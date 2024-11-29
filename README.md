@@ -1,12 +1,28 @@
 # bitframes-randao
 
-This repository will hold some of the scripts for a trust-minimized random raffle ceremony using Ethereum's RANDAO block attribute.
+This repository will hold some of the scripts for a trust-minimized random raffle ceremony using Ethereum's RANDAO block attribute, used in [Bitframes 32 Bit Editions](https://bitframes.io/editions) selection.
 
-It will follow the same protocol as outlined here:
+It builds upon the protocol I set up [for Meridian](https://github.com/mattdesl/meridian-discord-voting).
 
-https://github.com/mattdesl/meridian-discord-voting
+## How it Works
 
-SHA-256 commitments will be posted soon to this repo, some days before the ceremony will begin, to ensure no party (not even me) can game the raffle.
+To create a fair raffle, I've decided to use a bit of cryptography and single leader election driven by Ethereum's Proof of Stake PREVRANDAO mechanism[^1]. In Ethereum, each new block proposed to the network includes a PREVRANDAO field, which is a pseudo-random 256-bit integer[^2]. This integer will be used as a seed to select the raffle winners randomly from the list of eligible users.
+
+The goal of this ceremony is to ensure that no single party, even myself, can significantly bias and influence the raffle results, and to ensure this can be verified after the fact using cryptography and math.
+
+> ###### 🎨✨ Consider this ceremony partly an artistic performance using the blockchain, and partly a multi-party computation scheme for a cryptographically verifiable random raffle.
+
+### The Block Key
+
+One contribution of randomness is from Ethereum's RANDAO mechanism, which is very hard to game. Somebody attempting to influence RANDAO would need to be a validator (which itself is costly) and the chance of them being selected as a block producer at a given slot is very low, unless they control a massive percentage of all staked Ether. Block producers cannot choose a specific RANDAO integer, but they can choose to opt-out of producing a block, and so they have a very limited 1 bit of biasability.
+
+### The Artist Key
+
+Theoretically, it _is_ possible (albeit extremely unlikely) that a colluding group of Ethereum block producers could slightly bias the RANDAO value to their benefit in this raffle. To mitigate against this theoretical biasing, I am also keeping a `SECRET_KEY`, which is a random 256-bit integer that will be XORed with the RANDAO value to produce a final state for randomness. I will only publicly reveal this `SECRET_KEY` value after each weekly raffle.
+
+This means that even though a validator could potentially bias RANDAO, they would not be able to predict in which way their bias would affect the raffle output.
+
+Because of this, the ceremony is not _completely_ trust-minimized, as you also have to trust that I am not staking so much ETH that I can influence the raffle (the cost of reliably biasing RANDAO is in the order of hundreds of millions of USD).[^3]
 
 ## Special Conditions
 
@@ -42,7 +58,7 @@ Instead of using timestamps, the project uses block ranges between weeks, which 
 
 ## Commitments
 
-Cryptographic commitments to the `SECRET_KEY_*` environment variables. The random variables were computed by the artist using [random-256bit.js](./src/random-256bit.js) and the SHA-256 hashes for each is shown below.
+Cryptographic commitments to the `SECRET_KEY_*` environment variables, posted before the raffle, so that the artist cannot change them after the fact. The random variables were computed by the artist using [random-256bit.js](./src/random-256bit.js) and the SHA-256 hashes for each is shown below.
 
 ```sh
 # echo -n 0x... | shasum -a 256
@@ -52,9 +68,11 @@ SECRET_KEY_WEEK_3="d43ec69168f9cf485aa3455c32fe7bca3f0ee497624d24b527b10fc9b74e4
 SECRET_KEY_WEEK_4="f49c77733d839d666e699b50e2f2b44cf01a27e99e44067154d3d49da27b3756"
 ```
 
+This git repo and its SHA hashes also acts as a form of commitment to the current raffle logic and scripts.
+
 ## Running Locally
 
-To run the script locally, first clone the repository, `cd` into it, then `npm install` its dependencies with a new version of Node.js (tested with v20.13.1). Then add an `.env` file in the folder, with the following variables (secrets will be revealed each week after raffle execution).
+To run the scripts locally, first clone the repository, `cd` into it, then `npm install` its dependencies with a new version of Node.js (tested with v20.13.1). Then add an `.env` file in the folder, with the following variables (secrets will be revealed each week after raffle execution).
 
 ```sh
 INFURA_API_KEY="YOUR_API_KEY"
@@ -77,6 +95,6 @@ npm run raffle:4
 
 MIT, see [LICENSE.md](http://github.com/mattdesl/bitframes-randao/blob/master/LICENSE.md) for details.
 
-```
-
-```
+[^1]: You can read more about the mechanics of RANDAO [here](https://eth2book.info/capella/part2/building_blocks/randomness/).
+[^2]: This integer is computed by aggregating the BLS signature of each block producer.
+[^3]: Statistical analysis on Ethereum k-consecutive block proposal probabilities: https://alrevuelta.github.io/posts/ethereum-mev-multiblock
