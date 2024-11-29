@@ -6,7 +6,7 @@ It builds upon the protocol I set up [for Meridian](https://github.com/mattdesl/
 
 ## How it Works
 
-To create a fair raffle, I've decided to use a bit of cryptography and single leader election driven by Ethereum's Proof of Stake PREVRANDAO mechanism[^1]. In Ethereum, each new block proposed to the network includes a PREVRANDAO field, which is a pseudo-random 256-bit integer[^2]. This integer will be used as a seed to select the raffle winners randomly from the list of eligible users.
+To create a fair raffle, I've decided to use a bit of cryptography and single leader election driven by Ethereum's Proof of Stake RANDAO mechanism[^1]. In Ethereum, each new block proposed to the network includes a `PREVRANDAO` field, which is a pseudo-random 256-bit integer[^2]. This integer will be used as a seed to select the raffle winners randomly from the list of eligible users.
 
 The goal of this ceremony is to ensure that no single party, even myself, can significantly bias and influence the raffle results, and to ensure this can be verified after the fact using cryptography and math.
 
@@ -48,7 +48,7 @@ Instead of using timestamps, the project uses block ranges between weeks, which 
   - In Week 1, `fromBlock` is the origin of the contract
   - In Week 4, `toBlock` is the block that processed the last mint
 - Using the event args, create a CSV file with `token_id,invoker_address` in each line (row)
-- Query the PREVRANDAO of the block number associated with the last mint in that week, i.e. the week's ending toBlock as described above. For example, block `21294591` for Week 1.
+- Query the `PREVRANDAO` of the block number associated with the last mint in that week, i.e. the week's ending toBlock as described above. For example, block `21294591` for Week 1.
 - Query the `SECRET_KEY_WEEK_*` from the `process.env`, which is held by the artist in secret and revealed upon each weekly raffle execution.
 - XOR the two BigInts by doing `PREVRANDAO ^ SECRET_KEY`; from the resulting number, take the first 128 bits and use this as a seed state for xorshift128, a strong pseudo random number generator (PRNG).
 - Read the CSV file and turn it into a list of rows, filtering out (i.e. excluding) any rows associated with "Team" addresses (artist, filmmakers, platform).
