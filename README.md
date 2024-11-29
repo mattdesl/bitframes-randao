@@ -69,6 +69,8 @@ SECRET_KEY_WEEK_3="d43ec69168f9cf485aa3455c32fe7bca3f0ee497624d24b527b10fc9b74e4
 SECRET_KEY_WEEK_4="f49c77733d839d666e699b50e2f2b44cf01a27e99e44067154d3d49da27b3756"
 ```
 
+See the [Running Locally](#running-locally) for the revealed secrets each week.
+
 This git repo and its SHA hashes also acts as a form of commitment to the current raffle logic and scripts.
 
 ## Running Locally
@@ -77,7 +79,7 @@ To run the scripts locally, first clone the repository, `cd` into it, then `npm 
 
 ```sh
 INFURA_API_KEY="YOUR_API_KEY"
-SECRET_KEY_WEEK_1="0x..."
+SECRET_KEY_WEEK_1="0x0f97dbae7ad36d83e9530767f7681daaf2890d950431d734d28d1875e17bd200"
 SECRET_KEY_WEEK_2="0x..."
 SECRET_KEY_WEEK_3="0x..."
 SECRET_KEY_WEEK_4="0x..."
