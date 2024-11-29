@@ -54,17 +54,19 @@ const { prng } = await raffle({
 // Shuffle the mints with Fischer-Yates
 const shuffled = shuffle(prng, mints);
 
-const winAmount = 4;
-// TODO: Ensure same address cannot win twice in a given week
-for (let i = 0; i < winAmount; i++) {
+// Loop through each until we reach 4x winners
+const WIN_AMOUNT = 4;
+const winners = [];
+for (let i = 0; i < shuffled.length && winners.length < WIN_AMOUNT; i++) {
   const row = shuffled[i];
-  console.log(
-    "  WINNER: %d of %d - TOKEN #%s minted by %s",
-    i + 1,
-    winAmount,
-    row[0],
-    row[1]
-  );
+  const address = row[1];
+  // if this address has not won a token yet
+  if (!winners.some((other) => other.toLowerCase() == address.toLowerCase())) {
+    winners.push(address);
+    console.log("  WINNER: %d of %d - %s", winners.length, WIN_AMOUNT, address);
+  } else {
+    // Skip this entry in the CSV
+  }
 }
 
 console.log();

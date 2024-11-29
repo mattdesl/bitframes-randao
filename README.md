@@ -53,8 +53,8 @@ Instead of using timestamps, the project uses block ranges between weeks, which 
 - XOR the two BigInts by doing `PREVRANDAO ^ SECRET_KEY`; from the resulting number, take the first 128 bits and use this as a seed state for xorshift128, a strong pseudo random number generator (PRNG).
 - Read the CSV file and turn it into a list of rows, filtering out (i.e. excluding) any rows associated with "Team" addresses (artist, filmmakers, platform).
 - Using the PRNG, apply Fisher–Yates shuffle to this new filtered list.
-- Sample the first 4 rows from the shuffled list, the addresses in these rows will win one token each in that order. Considerations:
-  - Keep track of which addresses have won, and skip those if they arise again, to ensure each address can only win once in a given week.
+- In sequence, sample the first 4 winning (unique) addresses from the shuffled list. Considerations:
+  - Keep track of which addresses have been marked as won, and skip those if they arise again, to ensure each address can only win one token in a given week.
   - If any further conflict arises (e.g. a wallet is deemed to be associated with the Team and it hadn't been excluded), keep sampling the next elements in the list until a valid user address is found.
 
 ## Commitments
