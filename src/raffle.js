@@ -55,6 +55,7 @@ const { prng } = await raffle({
 const shuffled = shuffle(prng, mints);
 
 const winAmount = 4;
+// TODO: Ensure same address cannot win twice in a given week
 for (let i = 0; i < winAmount; i++) {
   const row = shuffled[i];
   console.log(
