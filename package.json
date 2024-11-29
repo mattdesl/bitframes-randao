@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "index.js",
   "license": "MIT",
   "author": {
     "name": "Matt DesLauriers",
@@ -14,7 +13,10 @@
     "ethers": "^6.13.4"
   },
   "scripts": {
-    "test": "node test.js"
+    "raffle:1": "node src/fetch-mints.js 1 && node src/raffle.js 1",
+    "raffle:2": "node src/fetch-mints.js 2 && node src/raffle.js 2",
+    "raffle:3": "node src/fetch-mints.js 3 && node src/raffle.js 3",
+    "raffle:4": "node src/fetch-mints.js 4 && node src/raffle.js 4"
   },
   "keywords": [],
   "repository": {

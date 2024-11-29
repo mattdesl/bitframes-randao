@@ -1,27 +1,72 @@
 import { ethers } from "ethers";
 import "dotenv/config";
+import {
+  WEEKLY_BLOCK_RANGE,
+  ADDRESSES_TO_EXCLUDE_LOWERCASE,
+} from "./constants.js";
+import { readFile } from "fs/promises";
 
-const argv = process.argv.slice(2);
-const network = argv[0] || "mainnet";
-const blockNumber = parseInt(argv[1], 10);
-const secretKey = argv[2];
-const count = argv[3];
-if (!network || !blockNumber || !secretKey || !count)
-  throw new Error("malformed input");
+const week = process.argv[2];
+if (!week) throw new Error("no week param");
+if (week < 1 || week > 4) throw new Error("invalid week param");
 
-const { random } = await raffle({
+const blockNumber = WEEKLY_BLOCK_RANGE[week] - 1;
+const csv = `output/week-${week}.csv`;
+
+const network = process.env.NETWORK || "mainnet";
+const secretKey = process.env[`SECRET_KEY_WEEK_${week}`];
+if (!network || !blockNumber || !secretKey) throw new Error("malformed input");
+
+const csvStr = await readFile(csv, "utf8");
+const allMints = csvStr
+  .split("\n")
+  .map((s) => s.trim())
+  .filter(Boolean)
+  .map((s) => {
+    const [a, b] = s.split(",");
+    return [parseInt(a, 10), b];
+  });
+const mints = allMints.filter(
+  ([_, address]) =>
+    !ADDRESSES_TO_EXCLUDE_LOWERCASE.includes(address.toLowerCase())
+);
+
+console.log("\n------ RUNNING RAFFLE ------");
+// console.log("  WEEK:", week);
+// console.log("  TOTAL_VALID_MINT_COUNT:", mints.length);
+
+if (mints.length < 4) {
+  throw new Error("Less than 4 valid mints");
+}
+
+// import webcrypto from "crypto";
+// const bytes = new Uint8Array(16);
+// webcrypto.getRandomValues(bytes);
+// const random = xorshift128(new Uint32Array(bytes.buffer));
+
+const { prng } = await raffle({
   network,
   blockNumber,
   secretKey,
   log: true,
 });
 
-// generate N random numbers from this block
-console.log(`Generating ${count} random number(s):`);
-for (let i = 0; i < count; i++) {
-  const u32 = random.nextUint32();
-  console.log(u32);
+// Shuffle the mints with Fischer-Yates
+const shuffled = shuffle(prng, mints);
+
+const winAmount = 4;
+for (let i = 0; i < winAmount; i++) {
+  const row = shuffled[i];
+  console.log(
+    "  WINNER: %d of %d - TOKEN #%s minted by %s",
+    i + 1,
+    winAmount,
+    row[0],
+    row[1]
+  );
 }
+
+console.log();
 
 export async function raffle({
   network = "mainnet",
@@ -53,22 +98,20 @@ export async function raffle({
     dataView.setUint8(i, bytes[i]);
   }
 
-  console.log(rndState128Bit, rndState128Bit.byteLength);
-
   // Seed the sfc32 PRNG
-  const random = xorshift128(rndState128Bit);
+  const prng = xorshift128(rndState128Bit);
 
   if (log) {
-    console.log("Block Number:", blockNumber);
-    console.log("Block PREVRANDAO:", ethers.toBeHex(mixA, BYTE_WIDTH));
-    console.log("Secret Key:", ethers.toBeHex(mixB, BYTE_WIDTH));
-    console.log("Seed:", ethers.toBeHex(seedBigInt, BYTE_WIDTH));
+    console.log("  BLOCK_NUMBER:", blockNumber);
+    console.log("  BLOCK_PREVRANDAO:", ethers.toBeHex(mixA, BYTE_WIDTH));
+    console.log(`  SECRET_KEY_WEEK_${week}:`, ethers.toBeHex(mixB, BYTE_WIDTH));
+    console.log("  COMPUTED_SEED:", ethers.toBeHex(seedBigInt, BYTE_WIDTH));
   }
 
   provider.destroy();
 
   return {
-    random,
+    prng,
     prevRandao,
     blockTimestamp: blockTimeMS,
   };
@@ -118,4 +161,23 @@ function xorshift128(state) {
     xs_state[0] = t ^ s ^ (s >>> 19);
     return xs_state[0];
   }
+}
+
+// Fisher-Yates shuffle
+function shuffle(prng, arr) {
+  if (!Array.isArray(arr)) {
+    throw new TypeError("Expected Array, got " + typeof arr);
+  }
+
+  var rand;
+  var tmp;
+  var len = arr.length;
+  var ret = arr.slice();
+  while (len) {
+    rand = Math.floor(prng.next() * len--);
+    tmp = ret[len];
+    ret[len] = ret[rand];
+    ret[rand] = tmp;
+  }
+  return ret;
 }
