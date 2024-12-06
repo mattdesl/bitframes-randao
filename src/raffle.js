@@ -32,17 +32,15 @@ const mints = allMints.filter(
 );
 
 console.log("\n------ RUNNING RAFFLE ------");
-// console.log("  WEEK:", week);
-// console.log("  TOTAL_VALID_MINT_COUNT:", mints.length);
+const uniqueAddresses = new Set(allMints.map((s) => s[1]));
+console.log("  WEEK:", week);
+console.log("  TOTAL_MINT_COUNT:", allMints.length);
+console.log("  TOTAL_VALID_MINT_COUNT:", mints.length);
+console.log("  UNIQUE_ADDRESS_COUNT:", uniqueAddresses.size);
 
 if (mints.length < 4) {
   throw new Error("Less than 4 valid mints");
 }
-
-// import webcrypto from "crypto";
-// const bytes = new Uint8Array(16);
-// webcrypto.getRandomValues(bytes);
-// const random = xorshift128(new Uint32Array(bytes.buffer));
 
 const { prng } = await raffle({
   network,
