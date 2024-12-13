@@ -83,7 +83,7 @@ To run the scripts locally, first clone the repository, `cd` into it, then `npm 
 ```sh
 INFURA_API_KEY="YOUR_API_KEY"
 SECRET_KEY_WEEK_1="0x0f97dbae7ad36d83e9530767f7681daaf2890d950431d734d28d1875e17bd200"
-SECRET_KEY_WEEK_2="0x..."
+SECRET_KEY_WEEK_2="0x6ab6ee4e5ed8192f182c4658f90cb697ec78fab2ffc0d55f48c57d90c339a02c"
 SECRET_KEY_WEEK_3="0x..."
 SECRET_KEY_WEEK_4="0x..."
 ```

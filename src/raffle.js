@@ -27,11 +27,12 @@ const mints = allMints.filter(
 );
 
 console.log("\n------ RUNNING RAFFLE ------");
-const uniqueAddresses = new Set(allMints.map((s) => s[1]));
-console.log("  WEEK:", week);
-console.log("  TOTAL_MINT_COUNT:", allMints.length);
-console.log("  TOTAL_VALID_MINT_COUNT:", mints.length);
-console.log("  UNIQUE_ADDRESS_COUNT:", uniqueAddresses.size);
+// const uniqueAddresses = new Set(allMints.map((s) => s[1]));
+// If more stats are desired
+// console.log("  WEEK:", week);
+// console.log("  TOTAL_MINT_COUNT:", allMints.length);
+// console.log("  TOTAL_VALID_MINT_COUNT:", mints.length);
+// console.log("  UNIQUE_ADDRESS_COUNT:", uniqueAddresses.size);
 
 if (mints.length < 4) {
   throw new Error("Less than 4 valid mints");
