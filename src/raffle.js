@@ -5,6 +5,7 @@ import {
   ADDRESSES_TO_EXCLUDE_LOWERCASE,
 } from "./constants.js";
 import { readFile } from "fs/promises";
+import { getMinters } from "./get-minters.js";
 
 const week = process.argv[2];
 if (!week) throw new Error("no week param");
@@ -18,14 +19,8 @@ const secretKey = process.env[`SECRET_KEY_WEEK_${week}`];
 if (!network || !blockNumber || !secretKey) throw new Error("malformed input");
 
 const csvStr = await readFile(csv, "utf8");
-const allMints = csvStr
-  .split("\n")
-  .map((s) => s.trim())
-  .filter(Boolean)
-  .map((s) => {
-    const [a, b] = s.split(",");
-    return [parseInt(a, 10), b];
-  });
+const allMints = getMinters(csvStr);
+
 const mints = allMints.filter(
   ([_, address]) =>
     !ADDRESSES_TO_EXCLUDE_LOWERCASE.includes(address.toLowerCase())

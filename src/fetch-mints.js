@@ -67,9 +67,9 @@ if (!dry) {
       continue;
     }
     const data = contract.interface.parseLog(log);
-    const { nftContract, invoker, tokenId, isMint } = data.args;
+    const { nftContract, invoker, tokenId, isMint, mintRecipient } = data.args;
     if (isMint && nftContract == CONTRACTS_MAINNET.NFT_OPEN.address) {
-      mints.push([Number(tokenId), String(invoker)]);
+      mints.push([Number(tokenId), String(invoker), String(mintRecipient)]);
     }
   }
 
@@ -90,8 +90,6 @@ if (!dry) {
     }
   }
 
-  const csv = mints
-    .map(([tokenId, invoker]) => `${tokenId},${invoker}`)
-    .join("\n");
+  const csv = mints.map((args) => args.join(",")).join("\n");
   await writeFile(`output/week-${WEEK}.csv`, csv);
 }

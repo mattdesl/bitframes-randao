@@ -27,6 +27,10 @@ export const CONTRACTS_MAINNET = {
 // Note these are the 'ending' ranges for each week, so number at index 1 == Week 1 ending block (exclusive)
 export const WEEKLY_BLOCK_RANGE = [null, 21294592, 21344588, 21394584, null];
 
+// The bridge address
+export const BRIDGE_ADDRESS_LOWERCASE =
+  "0xb90ed4c123843cbFD66b11411Ee7694eF37E6E72".toLowerCase();
+
 // The 'team' (any user/wallet directly involved with creating the Bitframes project)
 // are excluded from being able to win one of the 32 bit editions
 export const ADDRESSES_TO_EXCLUDE_LOWERCASE = [
@@ -41,4 +45,5 @@ export const ADDRESSES_TO_EXCLUDE_LOWERCASE = [
   "0xcAb81F14A3Fc98034a05bAb30f8D0E53e978c833",
   "0x32262672C6D1B814019f4Ca4e2fc53285a919704",
   "0xA49958fa14309F3720159c83cD92C5F38B1e3306",
+  BRIDGE_ADDRESS_LOWERCASE,
 ].map((n) => n.toLowerCase());

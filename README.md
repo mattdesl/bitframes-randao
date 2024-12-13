@@ -47,14 +47,17 @@ Instead of using timestamps, the project uses block ranges between weeks, which 
   - Only updates with `isMint=true` and `nftContract=0x2c7f335460fB9dF460FF7AD6CC64cb7Dd4064862` are considered
   - In Week 1, `fromBlock` is the origin of the contract
   - In Week 4, `toBlock` is the block that processed the last mint
-- Using the event args, create a CSV file with `token_id,invoker_address` in each line (row)
+  - Be sure to capture both the `tokenId`, `invoker` and `mintRecipient`
+- Using the event args, create a CSV file with `token_id,invoker_address,recipient_address` in each line (row)
 - Query the `PREVRANDAO` of the block number associated with the last mint in that week, i.e. the week's ending toBlock as described above. For example, block `21294591` for Week 1.
 - Query the `SECRET_KEY_WEEK_*` from the `process.env`, which is held by the artist in secret and revealed upon each weekly raffle execution.
 - XOR the two BigInts by doing `PREVRANDAO ^ SECRET_KEY`; from the resulting number, take the first 128 bits and use this as a seed state for xorshift128, a strong pseudo random number generator (PRNG).
-- Read the CSV file and turn it into a list of rows, filtering out (i.e. excluding) any rows associated with "Team" addresses (artist, filmmakers, platform).
+- Read the CSV file and turn it into a list of rows of "valid mints and their minters":
+  - For any rows where `invoker_address` is equal to the bridge relay (`0xb90ed4c123843cbFD66b11411Ee7694eF37E6E72`), use instead the `recipient_address`, otherwise use the `invoker_address`
+  - Then filter out (i.e. excluding) any rows associated with "Team" addresses (artist, filmmakers, platform).
 - Using the PRNG, apply Fisher–Yates shuffle to this new filtered list.
 - In sequence, sample the first 4 winning (unique) addresses from the shuffled list. Considerations:
-  - Keep track of which addresses have been marked as won, and skip those if they arise again, to ensure each address can only win one token in a given week.
+  - Keep track of which minter addresses have been marked as won, and skip those if they arise again, to ensure each address can only win one token in a given week.
   - If any further conflict arises (e.g. a wallet is deemed to be associated with the Team and it hadn't been excluded), keep sampling the next elements in the list until a valid user address is found.
 
 ## Commitments
@@ -93,6 +96,11 @@ npm run raffle:2
 npm run raffle:3
 npm run raffle:4
 ```
+
+## Changelog
+
+- Dec 12, 2024 - a change was made to have cross-chain mints included in the raffle. The `invoker` in these cases will be the relay address, and so in these cases the `mintRecipient` has to instead be considered.
+  - It so happens that the first two weeks raffles' PRNGs did not select any rows in the CSV that were initiated by the bridge relay contract; so this change in the script is not something that would have affected the results of previous weeks. However, it might affect the results of future weeks, i.e. with this new change in place, a user who minted on Base L2 can actually receive one of the 32 Bit Editions if the PRNG selects that row.
 
 ## License
 
